@@ -1,57 +1,69 @@
+#include <cctype>
 #include <iostream>
+#include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
-
-//<root>
-//  <div name=''>
-//      <h1>THIS IS MY HTML</h1>
-//      
-//  </div>
-//</root>
-//
-//
-//
-//ROOT DIV H1 H1CLOSE DIVCLOSE ROOTCLOSE
-enum Token{
-    ROOT,
-    CLOSEROOT,
-    DIV,
-    CLOSEDIV,
-    H1,
-    CLOSEH1,
-    P,
-    CLOSEP,
-    NONE
-};
-
-enum propertyType{
-    NAME,
-    NOP
-};
+#include <fstream>
 
 
-class node{
-private:
-    Token nodeVal;
-    propertyType Property;
-    std::string PropertyVal;
-    std::vector<node*> children;
-
-public:
-    node(){
-        nodeVal = NONE;
-        Property = propertyType::NOP;
-        PropertyVal = "";
-        children = {};
+template<typename T>
+std::string convertToToken(const char* filepath){
+    std::vector<std::pair<std::string, T>> tokens;
+    std::ifstream file(filepath);
+    if(file.fail()){
+        std::cerr << "Failed to open file" << filepath;
     }
-};
+    std::string code;
+    std::string line;
+    while(std::getline(file , line)){
+        int i = 0 ;
+        while(i < line.size()){
+            if(std::isalpha(line[i]) || line[i] == '_'){
+                std::string buffer;
+                while(i < line.size() && (std::isalpha(line[i]) || std::isdigit(line[i]) || line[i] == '_')){
+                    buffer+= line[i];
+                    i++;
+                }
+                tokens.push_back({"IDENTIFIER" , buffer});
+            }
+        }
+    }
+}
+
+/*
+        std::istringstream iss(line);
+        std::string segment;
+        while(std::getline(iss , segment , ' ')){
+            std::cout << segment << "\n";
+        }
+    }
+
+  */
 
 
-std::string convertStringToToken(){}
-std::vector<std::string> tokenList(std::string tokenString){}
+node* convertToAST(){
+
+
+}
 
 
 int main(){
-
-
+    std::ifstream file("index.mhtml");
+    if(file.fail()){
+        std::cerr << "Failed to open file" << "index.mhtml";
+    }
+    std::string code;
+    std::string line;
+    while(std::getline(file , line)){
+        for(int i = 0 ; i < line.size() ; i++){
+            if(line[i] == '/')continue;
+            if(line[i] == '<' || line[i] == '>'){
+                code +=':';
+                continue;
+            }
+            code +=line[i];
+        }
+    }
+    std::cout << code;
 }

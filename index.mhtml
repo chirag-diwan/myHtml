@@ -1,5 +1,13 @@
 @div .card .primary id:main {
-    @h1 { Hello }
+    @div id:  primary {
+        @h1 { }
+    }
+    @h1 { "Hello" }
     @p { "This is text." }
-    @img src:"x.png" alt:
+    @img src:"x.png" {}
+    @div .glowWhiteSquare id:frontSection{
+        @h1 {"This is a glowing white square"}
+        @p {""}
+
+    }
 }

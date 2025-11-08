@@ -1,6 +1,7 @@
 #include <cctype>
 #include <cstdio>
 #include <cstdlib>
+#include <exception>
 #include <iostream>
 #include <memory>
 #include <sstream>
@@ -78,6 +79,7 @@ std::vector<token> Lexer(const char* filepath){
         char currentChar;
         char nextChar = file.peek();
         file.read(&currentChar , sizeof(currentChar));
+        if(currentChar == ' ')continue;
         if(currentChar == '@'){
             Tokens.push_back({"@" , tokensEnum::AT});
         }else if (currentChar == '{'){
@@ -122,19 +124,19 @@ std::vector<token> Lexer(const char* filepath){
     return Tokens;
 }
 
-struct Property {
-    std::string name;
+struct Class{
+    std::string className;
 };
 
-struct Selector {
-    std::string name;
-    std::string value;
+struct IdentifyingProperty {
+    std::string identifer;
+    std::string identifierName;
 };
 
 struct ASTNode {
-    std::string tag; 
-    std::vector<Selector> selectors;
-    std::vector<Property> properties;
+    std::string tag;
+    std::vector<IdentifyingProperty> identfyingProperties;
+    std::vector<Class> classes;
     std::vector<ASTNode*> children;
     std::vector<std::string> textList;
 };
@@ -142,27 +144,30 @@ struct ASTNode {
 
 class Parser{
 private:
-    //0,1,2,3,4,5,6,7,8
-    //index
-
     token peek(){
+        if(index + 1 >= tokens.size())return token{"" , (tokensEnum)0};
         return tokens[index + 1];
     }
     token advance(){
         index++;
         return tokens[index - 1];
     }
-    bool match(tokensEnum type){
-        if(tokens[index].type == type){
-            return true;
-        }
-        return false;
-    };
+    bool match(tokensEnum type) {
+        return index < tokens.size() && tokens[index].type == type;
+    }
+    
     token expect(tokensEnum type){
-        if(tokens[index].type == type){
-            return advance();
+        if (index >= tokens.size()) {
+            std::cerr << "Expected " << tokenToString(type) << " but got EOF\n";
+            std::exit(EXIT_FAILURE);
         }
-        std::exit(EXIT_FAILURE);
+        if (tokens[index].type != type) {
+            std::cerr << "Expected " << tokenToString(type)
+                << " but got " << tokenToString(tokens[index].type)
+                << " ('" << tokens[index].value << "') at index " << index << "\n";
+            std::exit(EXIT_FAILURE);
+        }
+        return advance();
     }
     std::vector<token> tokens;
     size_t index;
@@ -177,14 +182,21 @@ public:
 
 
         while (match(tokensEnum::CLASS)) {
-            node->properties.push_back({advance().value});
+            node->classes.push_back({advance().value});
         }
 
-        while(match(tokensEnum::IDENTIFIER)){
+        while(match(tokensEnum::IDENTIFIER) && peek().type == tokensEnum::COLON){
+
             const std::string ident = advance().value;
             expect(tokensEnum::COLON);
-            const token t = expect(tokensEnum::IDENTIFIER);
-            node->selectors.push_back({ident , t.value});
+            if(match(tokensEnum::IDENTIFIER)){
+                node->identfyingProperties.push_back({ident , advance().value});
+            }else if(match(tokensEnum::STRING)){
+                node->identfyingProperties.push_back({ident , advance().value});
+            }else{
+                std::cerr << "Error Parsing File at :: " << index;
+                std::exit(EXIT_FAILURE);
+            }
         }
 
         expect(LBRACE);
@@ -192,13 +204,69 @@ public:
         while(!match(tokensEnum::RBRACE)){
             if(match(tokensEnum::STRING)){
                 node->textList.push_back(advance().value);
-            }  
+            }else if(match(tokensEnum::AT)){
+                node->children.push_back(parseNode());
+            }else{
+                std::cerr << "INVALID TOKEN AT INDEX :: " << index;
+                break;
+            }
         }
+        expect(tokensEnum::RBRACE);
+        return node;
     }
 };
 
 
+void printTree(ASTNode* node, const std::string& prefix = "", bool isLast = true) {
+    if (!node) return;
+
+    std::cout << prefix;
+    std::cout << (isLast ? "└── " : "├── ");
+    std::cout << "@" << node->tag;
+
+    // Print classes
+    for (const auto& cls : node->classes) {
+        std::cout << " " << cls.className;
+    }
+
+    // Print properties
+    for (const auto& prop : node->identfyingProperties) {
+        std::cout << " " << prop.identifierName << ":" << prop.identifierName;
+    }
+
+    std::cout << "\n";
+
+    // Print text content
+    for (size_t i = 0; i < node->textList.size(); ++i) {
+        std::string textPrefix = prefix + (isLast ? "    " : "│   ");
+        std::cout << textPrefix;
+        std::cout << (i == node->textList.size() - 1 && node->children.empty() ? "└── " : "├── ");
+        std::cout << "\"" << node->textList[i] << "\"\n";
+    }
+
+    // Print children
+    for (size_t i = 0; i < node->children.size(); ++i) {
+        bool lastChild = (i == node->children.size() - 1);
+        std::string childPrefix = prefix + (isLast ? "    " : "│   ");
+        printTree(node->children[i], childPrefix, lastChild);
+    }
+}
+
 int main(){
     auto Tokens = Lexer("index.mhtml");
+    for(const auto & [value , token] : Tokens){
+        std::cout << "Value :: " << value << " Token :: " << tokenToString(token)  << "\n";
+    }
+
+    Parser p(Tokens);
+    ASTNode* root = p.parseNode();
+
+    try {
+        printTree(root);
+        delete root;
+    } catch (...) {
+        std::cerr << "Parsing failed.\n";
+        return 1;
+    }
     return 0;
 }

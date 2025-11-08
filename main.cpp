@@ -1,8 +1,11 @@
 #include <cctype>
 #include <cstdio>
+#include <cstdlib>
 #include <iostream>
+#include <memory>
 #include <sstream>
 #include <string>
+#include <system_error>
 #include <vector>
 #include <fstream>
 
@@ -119,6 +122,80 @@ std::vector<token> Lexer(const char* filepath){
     return Tokens;
 }
 
+struct Property {
+    std::string name;
+};
+
+struct Selector {
+    std::string name;
+    std::string value;
+};
+
+struct ASTNode {
+    std::string tag; 
+    std::vector<Selector> selectors;
+    std::vector<Property> properties;
+    std::vector<ASTNode*> children;
+    std::vector<std::string> textList;
+};
+
+
+class Parser{
+private:
+    //0,1,2,3,4,5,6,7,8
+    //index
+
+    token peek(){
+        return tokens[index + 1];
+    }
+    token advance(){
+        index++;
+        return tokens[index - 1];
+    }
+    bool match(tokensEnum type){
+        if(tokens[index].type == type){
+            return true;
+        }
+        return false;
+    };
+    token expect(tokensEnum type){
+        if(tokens[index].type == type){
+            return advance();
+        }
+        std::exit(EXIT_FAILURE);
+    }
+    std::vector<token> tokens;
+    size_t index;
+
+public:
+    Parser(const std::vector<token>& tokens) : tokens(tokens), index(0) {}
+    ASTNode* parseNode(){
+        expect(tokensEnum::AT);
+        std::string tag = expect(tokensEnum::IDENTIFIER).value;
+        ASTNode* node = new ASTNode();
+        node->tag = tag;
+
+
+        while (match(tokensEnum::CLASS)) {
+            node->properties.push_back({advance().value});
+        }
+
+        while(match(tokensEnum::IDENTIFIER)){
+            const std::string ident = advance().value;
+            expect(tokensEnum::COLON);
+            const token t = expect(tokensEnum::IDENTIFIER);
+            node->selectors.push_back({ident , t.value});
+        }
+
+        expect(LBRACE);
+
+        while(!match(tokensEnum::RBRACE)){
+            if(match(tokensEnum::STRING)){
+                node->textList.push_back(advance().value);
+            }  
+        }
+    }
+};
 
 
 int main(){

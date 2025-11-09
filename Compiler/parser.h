@@ -39,10 +39,15 @@ struct IdentifyingProperty {
     std::string identifierName;
 };
 
+struct Attribute {
+    std::string name;
+    std::string value;
+};
+
 struct ASTNode {
     std::string tag;
-    std::vector<IdentifyingProperty> identfyingProperties;
     std::vector<tokenClass> classes;
+    std::vector<Attribute> attributes;        // <-- NEW
     std::vector<ASTNode*> children;
     std::vector<std::string> textList;
 };
@@ -64,5 +69,9 @@ public:
 
 
 void printTree(ASTNode* node, const std::string& prefix = "", bool isLast = true) ;
+
+std::string convertToHtml(ASTNode* root , std::string& parentHtml , std::string indent);
+
+void writeHtml(std::string parentHtml);
 
 #endif

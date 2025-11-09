@@ -1,21 +1,25 @@
-#include "./parser.h"
+#include "./Compiler/parser.h"
+#include <cstdlib>
 
 
-int main(){
-    auto Tokens = Lexer("index.mhtml");
-    for(const auto & [value , token] : Tokens){
-        std::cout << "Value :: " << value << " Token :: " << tokenToString(token)  << "\n";
-    }
-
+int main(int argv , char* argc[]){
+    auto Tokens = Lexer(std::string(argc[1]).c_str());
+    /*for(const auto & [value , token] : Tokens){
+        std::cout << "value :: " << value << "  Token :: " << token << "\n";
+    }*/
     Parser p(Tokens);
     ASTNode* root = p.parseNode();
-
-    try {
+    std::string parentHtml = "";
+    std::string indent = "";
+    std::string html = convertToHtml(root , parentHtml , indent);
+    std::cout << html;
+    writeHtml(html);
+    /*try {
         printTree(root);
         delete root;
     } catch (...) {
         std::cerr << "Parsing failed.\n";
-        return 1;
-    }
+        std::exit(EXIT_FAILURE);
+    }*/
     return 0;
 }

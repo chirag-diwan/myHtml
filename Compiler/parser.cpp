@@ -66,16 +66,19 @@ std::vector<token> Lexer(const char* filepath){
             Tokens.push_back({buffer , tokensEnum::CLASS});
         }else if(currentChar == ':'){
             Tokens.push_back({":" , tokensEnum::COLON});
-        }else if(std::isalpha(currentChar)){
-            std::string buffer = "";
-            while(std::isalpha(nextChar) || std::isdigit(nextChar)){
-                buffer += currentChar;
-                file.read(&currentChar, sizeof(currentChar));
-                nextChar = file.peek();
-            }
+        }else if (std::isalpha(currentChar) || currentChar == '_') {
+            std::string buffer;
             buffer += currentChar;
 
-            Tokens.push_back({buffer , tokensEnum::IDENTIFIER});
+            while (file.peek() != EOF) {
+                char next = file.peek();
+                if (std::isalnum(next) || next == '_' || next == '-') {
+                    buffer += file.get();
+                } else {
+                    break; 
+                }
+            }
+            Tokens.push_back({buffer, tokensEnum::IDENTIFIER});
         }else if(currentChar == '"'){
             std::string buffer;
 
@@ -120,41 +123,43 @@ token Parser::expect(tokensEnum type){
 }
 
 Parser::Parser(const std::vector<token>& t) : tokens(t), index(0) {}
-ASTNode* Parser::parseNode(){
+ASTNode* Parser::parseNode() {
     expect(tokensEnum::AT);
     std::string tag = expect(tokensEnum::IDENTIFIER).value;
     ASTNode* node = new ASTNode();
     node->tag = tag;
 
-
-    while (match(tokensEnum::CLASS)) {
-        node->classes.push_back({advance().value});
-    }
-
-    while(match(tokensEnum::IDENTIFIER) && peek().type == tokensEnum::COLON){
-
-        const std::string ident = advance().value;
-        expect(tokensEnum::COLON);
-        if(match(tokensEnum::IDENTIFIER)){
-            node->identfyingProperties.push_back({ident , advance().value});
-        }else if(match(tokensEnum::STRING)){
-            node->identfyingProperties.push_back({ident , advance().value});
-        }else{
-            std::cerr << "Error Parsing File at :: " << index;
-            std::exit(EXIT_FAILURE);
+    while (true) {
+        if (match(tokensEnum::CLASS)) {
+            const std::string cl = advance().value;
+            node->classes.push_back({cl.substr(1 , cl.size())});
+        }
+        else if (match(tokensEnum::IDENTIFIER) && peek().type == tokensEnum::COLON) {
+            std::string key = advance().value;
+            expect(tokensEnum::COLON);
+            std::string value = "";
+            if (match(tokensEnum::IDENTIFIER) || match(tokensEnum::STRING)) {
+                value = advance().value;
+            }
+            node->attributes.push_back({key, value});
+        }
+        else {
+            break;  
         }
     }
 
-    expect(LBRACE);
+    expect(tokensEnum::LBRACE);  
 
-    while(!match(tokensEnum::RBRACE)){
-        if(match(tokensEnum::STRING)){
+    while (!match(tokensEnum::RBRACE)) {
+        if (match(tokensEnum::STRING)) {
             node->textList.push_back(advance().value);
-        }else if(match(tokensEnum::AT)){
+        }
+        else if (match(tokensEnum::AT)) {
             node->children.push_back(parseNode());
-        }else{
-            std::cerr << "INVALID TOKEN AT INDEX :: " << index;
-            break;
+        }
+        else {
+            std::cerr << "INVALID TOKEN IN BODY: '" << tokens[index].value << "' at " << index << "\n";
+            std::exit(EXIT_FAILURE);
         }
     }
     expect(tokensEnum::RBRACE);
@@ -166,17 +171,14 @@ void printTree(ASTNode* node, const std::string& prefix, bool isLast) {
 
     std::cout << prefix;
     std::cout << (isLast ? "└── " : "├── ");
-    std::cout << "@" << node->tag;
+    std::cout << '@' << node->tag;
 
-    // Print classes
     for (const auto& cls : node->classes) {
         std::cout << " " << cls.className;
     }
 
-    // Print properties
-    for (const auto& prop : node->identfyingProperties) {
-        std::cout << " " << prop.identifierName << ":" << prop.identifierName;
-    }
+    for (const auto& attr : node->attributes)
+    std::cout << " " << attr.name << ":\"" << attr.value << "\"";
 
     std::cout << "\n";
 
@@ -193,3 +195,53 @@ void printTree(ASTNode* node, const std::string& prefix, bool isLast) {
         printTree(node->children[i], childPrefix, lastChild);
     }
 }
+
+std::string appendQuote(std::string a){
+    std::string buffer = "'";
+    buffer += a;
+    buffer += "'";
+    return buffer;
+}
+
+void writeHtml(std::string parentHtml){
+ 
+    std::ofstream file("index.html");
+    std::string htmlHeader = "";
+    htmlHeader += "<!DOCTYPE html>\n";
+    htmlHeader += "<html lang='en'>\n";
+    htmlHeader += "<head>\n";
+    htmlHeader += "    <meta charset='UTF-8'>\n";
+    htmlHeader += "    <meta name='viewport' content='width=device-width, initial-scale=1.0'>\n";
+    htmlHeader += "    <title>My Awesome App</title>\n";
+    htmlHeader += "    <link rel='stylesheet' href='style.css'>\n";
+    htmlHeader += "</head>\n";
+    htmlHeader += "<body>\n";
+    htmlHeader += parentHtml;
+    file.write(htmlHeader.c_str() , htmlHeader.size());
+}
+
+std::string convertToHtml(ASTNode* root , std::string& parentHtml , std::string indent){
+    parentHtml.append(indent);
+    parentHtml.append("<");
+    parentHtml.append(root->tag + " ");
+    for(const auto& c:root->classes){
+        parentHtml.append(" class="+ appendQuote(c.className));
+    }
+    for(const auto& a : root->attributes){
+        parentHtml.append(" " + a.name + '=' + appendQuote(a.value));
+    }
+    parentHtml += ">\n";
+    for(const auto & t : root->textList){
+        parentHtml.append(indent + "    ");
+        parentHtml.append(t);
+        parentHtml += "\n";
+    }
+    for(const auto& c : root->children){
+        convertToHtml(c , parentHtml ,indent + "    ");
+    }
+    parentHtml.append(indent);
+    parentHtml.append("</" + root->tag + ">\n");
+    return parentHtml;
+}
+
+

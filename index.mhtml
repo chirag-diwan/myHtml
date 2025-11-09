@@ -1,13 +1,146 @@
-@div .card .primary id:main {
-    @div id:  primary {
-        @h1 { }
+@div .app-container id:app {
+    @header .navbar .sticky {
+        @div .logo {
+            @img src:"logo.svg" alt:"MyBrand" {}
+            @h1 .brand-title { "My Awesome App" }
+        }
+        @nav .menu {
+            @ul {
+                @li .active { @a href:"#home" { "Home" } }
+                @li { @a href:"#features" { "Features" } }
+                @li { @a href:"#pricing" { "Pricing" } }
+                @li { @a href:"#contact" { "Contact" } }
+            }
+            @button .btn .btn-primary .menu-toggle { "Menu" }
+        }
     }
-    @h1 { "Hello" }
-    @p { "This is text." }
-    @img src:"x.png" {}
-    @div .glowWhiteSquare id:frontSection{
-        @h1 {"This is a glowing white square"}
-        @p {""}
 
+    @main .content {
+        @section .hero .parallax id:hero {
+            @div .overlay {}
+            @div .hero-text {
+                @h1 .animate-fade { "Build Something Great" }
+                @p .subtitle { "A modern, fast, and beautiful experience." }
+                @button .btn .btn-large .btn-gradient { "Get Started" }
+                @button .btn .btn-outline { "Learn More" }
+            }
+        }
+
+        @section .features id:features {
+            @h2 .section-title { "Why Choose Us?" }
+            @div .grid .grid-3 {
+                @div .card .feature-card .shadow-hover {
+                    @div .icon .bg-primary { "Lightning" }
+                    @h3 { "Lightning Fast" }
+                    @p { "Optimized for speed and performance." }
+                }
+                @div .card .feature-card .shadow-hover {
+                    @div .icon .bg-success { "Shield" }
+                    @h3 { "Secure by Default" }
+                    @p { "Bank-level encryption and privacy." }
+                }
+                @div .card .feature-card .shadow-hover {
+                    @div .icon .bg-warning { "Star" }
+                    @h3 { "Easy to Use" }
+                    @p { "No coding required. Drag & drop." }
+                }
+            }
+        }
+
+        @section .testimonials id:testimonials {
+            @h2 .section-title { "What People Say" }
+            @div .carousel {
+                @div .slide .active {
+                    @blockquote {
+                        @p { "This changed how I work. Incredible tool!" }
+                        @footer { "— Sarah Chen, Designer" }
+                    }
+                }
+                @div .slide {
+                    @blockquote {
+                        @p { "Best investment this year. Highly recommend." }
+                        @footer { "— Mark Torres, CEO" }
+                    }
+                }
+                @div .slide {
+                    @blockquote {
+                        @p { "Clean, fast, and beautiful. Love it!" }
+                        @footer { "— Alex Kim, Developer" }
+                    }
+                }
+            }
+            @div .dots {
+                @span .dot .active {}
+                @span .dot {}
+                @span .dot {}
+            }
+        }
+    }
+
+    @footer .footer-dark {
+        @div .footer-top {
+            @div .footer-column {
+                @h4 { "Product" }
+                @ul {
+                    @li { @a href:"#features" { "Features" } }
+                    @li { @a href:"#pricing" { "Pricing" } }
+                    @li { @a href:"#updates" { "Updates" } }
+                }
+            }
+            @div .footer-column {
+                @h4 { "Company" }
+                @ul {
+                    @li { @a href:"#about" { "About" } }
+                    @li { @a href:"#blog" { "Blog" } }
+                    @li { @a href:"#careers" { "Careers" } }
+                }
+            }
+            @div .footer-column {
+                @h4 { "Support" }
+                @ul {
+                    @li { @a href:"#help" { "Help Center" } }
+                    @li { @a href:"#contact" { "Contact" } }
+                    @li { @a href:"#status" { "Status" } }
+                }
+            }
+            @div .footer-column .social {
+                @h4 { "Follow Us" }
+                @div .social-icons {
+                    @a href:"https://facebook.com" .icon { "FB" }
+                    @a href:"https://twitter.com" .icon { "TW" }
+                    @a href:"https://instagram.com" .icon { "IG" }
+                    @a href:"https://github.com" .icon { "GH" }
+                }
+            }
+        }
+        @div .footer-bottom {
+            @p .copyright { "© 2025 MyApp. All rights reserved." }
+            @div .legal {
+                @a href:"#privacy" { "Privacy" }
+                @a href:"#terms" { "Terms" }
+            }
+        }
+    }
+
+    @div .glowWhiteSquare id:frontSection .floating {
+        @div .pulse-ring {}
+        @h1 .glow-text { "Glowing Spotlight" }
+        @p { "This section floats above everything with a soft glow." }
+        @button .btn .btn-glow { "Explore" }
+    }
+
+    @div .modal .hidden id:loginModal {
+        @div .modal-content {
+            @h2 { "Welcome Back" }
+            @form {
+                @input type:"email" placeholder:"you@example.com" {}
+                @input type:"password" placeholder:"••••••••" {}
+                @button .btn .btn-primary .full-width { "Log In" }
+            }
+            @p .text-center { 
+                "Don't have an account? "
+                    @a href:"#signup" { "Sign up" }
+            }
+        }
     }
 }

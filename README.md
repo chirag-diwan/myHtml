@@ -21,9 +21,9 @@
 ## [ShowCase]
 
 **This page was written in `MHTML`**
-[alt](Readme/image1.png)
-[alt](Readme/image2.png)
-[alt](Readme/image3.png)
+![alt](Readme/image1.png)
+![alt](Readme/image2.png)
+![alt](Readme/image3.png)
 
 
 ## Syntax (`.mhtml`)

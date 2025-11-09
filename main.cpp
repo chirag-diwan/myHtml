@@ -1,4 +1,4 @@
-#include "./Compiler/parser.h"
+#include "./Compiler/compiler.h"
 #include <cstdlib>
 
 

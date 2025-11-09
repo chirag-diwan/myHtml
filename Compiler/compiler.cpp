@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
-#include "./parser.h"
+#include "./compiler.h"
 
 std::string tokenToString(short int i){
     switch (i) {

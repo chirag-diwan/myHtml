@@ -13,7 +13,7 @@
 | **OpenGL 2D rendering engine** | In Progress |
 | Draw `@div`, `@img`, `@h1`, etc. as colored objects | Done |
 | Render text with **FreeType** or bitmap fonts | Planned |
-| CSS-like class support (`.card`, `.primary`) | Planned |
+| CSS-like class support (`.card`, `.primary`) | Done |
 | Layout system (flexbox-like) | Planned |
 
 ---

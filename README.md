@@ -1,4 +1,4 @@
-# MHTML → OpenGL Renderer  
+# MHTML 
 **MHTML is an programming language that compiles into HTML which then can be displayed on browsers MHTML uses curly brackets {} instead of angular brackets to make the code more readable . Currently MHTML supports only few HTML elements lkie `img` , `h1` ,`p` ,`ul` etc and allows to refer to links and filepaths**
 
 ---

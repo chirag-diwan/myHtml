@@ -1,25 +1,27 @@
 #include "./Compiler/compiler.h"
 #include <cstdlib>
+#include <cstring>
 
 
 int main(int argv , char* argc[]){
-    auto Tokens = Lexer(std::string(argc[1]).c_str());
-    /*for(const auto & [value , token] : Tokens){
-        std::cout << "value :: " << value << "  Token :: " << token << "\n";
-    }*/
+    bool isDegub = argv > 2 ? strcmp(argc[2] , "--debug") == 0 : false;
+    Lexer lexer;
+    lexer.LexFile(std::string(argc[1]).c_str());
+    auto Tokens = lexer.getTokens();
+    if(isDegub){
+        for(const auto & [value , token] : Tokens){
+            std::cout << "value :: " << value << "  Token :: " << token << "\n";
+        }
+    }
     Parser p(Tokens);
     ASTNode* root = p.parseNode();
     std::string parentHtml = "";
     std::string indent = "";
     std::string html = convertToHtml(root , parentHtml , indent);
-    std::cout << html;
     writeHtml(html);
-    /*try {
+    if(isDegub){
         printTree(root);
         delete root;
-    } catch (...) {
-        std::cerr << "Parsing failed.\n";
-        std::exit(EXIT_FAILURE);
-    }*/
+    }
     return 0;
 }

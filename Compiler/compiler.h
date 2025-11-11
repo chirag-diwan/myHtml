@@ -28,7 +28,12 @@ struct token{
 
 std::string tokenToString(short int i);
 
-std::vector<token> Lexer(const char* filepath);
+class Lexer{
+    std::vector<token> Tokens;
+public:
+    void LexFile(const char* filepath);
+    std::vector<token> getTokens();
+};
 
 struct tokenClass{
     std::string className;

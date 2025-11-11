@@ -37,12 +37,11 @@ std::string tokenToString(short int i){
     return "";
 }
 
-std::vector<token> Lexer(const char* filepath){
+void Lexer::LexFile(const char* filepath){
     std::ifstream file(filepath);
     if(file.fail()){
         std::cerr << "Error Opening File :: " << filepath;
     }
-    std::vector<token> Tokens;
     while(file.peek() != EOF){
         char prevChar;
         char currentChar;
@@ -93,6 +92,9 @@ std::vector<token> Lexer(const char* filepath){
             Tokens.push_back({buffer, tokensEnum::STRING});
         }
     }
+}
+
+std::vector<token> Lexer::getTokens(){
     return Tokens;
 }
 
